@@ -29,7 +29,6 @@ function render_frame(clear_color)
         imgui.Text("Status Child Window")
         if imgui.BeginChild("StatusChild", {x = 0, y = 150}, true) then
             imgui.Text("Status Child Window")
-            
         end
         imgui.EndChild()
         if imgui.TreeNode("RadioTree", "Radio Options") then

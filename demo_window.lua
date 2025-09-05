@@ -14,9 +14,6 @@ local tab2_open = true
 local tab3_open = true
 
 function render_frame(clear_color)
-    -- Update progress animation
-    timer = timer + (1.0 / imgui.GetFramerate())
-    progress = (math.sin(timer) + 1) / 2
 
     -- Demo window
     if show_demo_window then
@@ -24,14 +21,6 @@ function render_frame(clear_color)
         imgui.Text("ImGui Demo Window (native)")
         imgui.End()
     end
-
-    imgui.Begin("Child", true)
-        imgui.Text("Status Child Window")
-        if imgui.BeginChild("StatusChild", {x = 0, y = 150}, true) then
-            imgui.Text("Status Child Window")
-        end
-        imgui.EndChild()
-    imgui.End()
 
     return clear_color
 end

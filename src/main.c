@@ -232,7 +232,6 @@ static int lua_igCombo_Str_arr(lua_State *L) {
 }
 
 // Lua binding for igProgressBar
-// Lua binding for igProgressBar
 static int lua_igProgressBar(lua_State *L) {
     float fraction = (float)luaL_checknumber(L, 1);
     ImVec2 size = {0, 0}; // Default size
@@ -260,7 +259,6 @@ static int lua_igRadioButton(lua_State *L) {
     lua_pushboolean(L, clicked);
     return 1;
 }
-
 
 // Lua binding for igSeparator
 static int lua_igSeparator(lua_State *L) {
@@ -343,7 +341,6 @@ static int lua_igIsItemHovered(lua_State *L) {
     return 1;
 }
 
-
 // Lua binding for igBeginColumns
 static int lua_igBeginColumns(lua_State *L) {
     const char *str_id = luaL_checkstring(L, 1);
@@ -374,7 +371,6 @@ static int lua_igSetColumnWidth(lua_State *L) {
     igSetColumnWidth(column_index, width);
     return 0; // No return values
 }
-
 
 // Lua binding for igBeginChild_Str
 static int lua_igBeginChild(lua_State *L) {
@@ -428,9 +424,9 @@ static int lua_igTreePop(lua_State *L) {
     return 0; // No return values
 }
 
-
-int main() {
-    // Initialize SDL
+// Main
+int main(int argc, char *argv[]) {
+    // Initialize SDL 3.2
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
         fprintf(stderr, "Failed to init video! %s\n", SDL_GetError());
         return 1;
@@ -521,12 +517,45 @@ int main() {
     lua_pushcfunction(L, lua_igGetFramerate); lua_setfield(L, -2, "GetFramerate");
     lua_setglobal(L, "imgui");
 
-    // Load script.lua
-    if (luaL_dofile(L, "script.lua") != LUA_OK) {
-        fprintf(stderr, "Error loading script.lua: %s\n", lua_tostring(L, -1));
-        lua_pop(L, 1);
+    // Determine Lua script file
+    const char *script_file = (argc > 1) ? argv[1] : "script.lua";
+
+    // Check if file exists
+    FILE *file = fopen(script_file, "r");
+    if (!file) {
+        fprintf(stderr, "Error: Cannot open Lua script file '%s'\n", script_file);
+        lua_close(L);
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplSDL3_Shutdown();
+        igDestroyContext(NULL);
+        SDL_GL_DestroyContext(gl_context);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
         return -1;
     }
+    fclose(file);
+
+    // Load script.lua
+    if (luaL_dofile(L, script_file) != LUA_OK) {
+        fprintf(stderr, "Error loading Lua script '%s': %s\n", script_file, lua_tostring(L, -1));
+        lua_pop(L, 1);
+        lua_close(L);
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplSDL3_Shutdown();
+        igDestroyContext(NULL);
+        SDL_GL_DestroyContext(gl_context);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return -1;
+    }
+
+
+    // Load script.lua
+    // if (luaL_dofile(L, "script.lua") != LUA_OK) {
+    //     fprintf(stderr, "Error loading script.lua: %s\n", lua_tostring(L, -1));
+    //     lua_pop(L, 1);
+    //     return -1;
+    // }
 
     // Global clear color
     ImVec4 clear_color = {0.45f, 0.55f, 0.60f, 1.00f};
