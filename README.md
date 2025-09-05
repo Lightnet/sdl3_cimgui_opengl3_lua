@@ -5,6 +5,37 @@
 # Information:
   Very simple SDL 3.2.22 cimgui. OpenGL 3. 330. Lua script.
 
+
+# widgets:
+- [x]Window
+- [x] Text
+- [x] Button
+- [x] Input Field
+- [x] Sliders
+- [x] Checkboxes
+- [x] Radio Buttons
+- [x] Combo Boxes
+- [x] Progress Bar
+- [ ] Trees and Tree Nodes
+- [x] Separators and Spacing
+- [x] Tab Bars and Tab Items
+- [x] Tooltips
+- [ ] Child Windows
+- [ ] Columns
+
+## widgets community:
+- [ ] Plotting Libraries
+- [ ] Node Editors
+- [ ] Timeline Editors
+- [ ] Flame Graphs
+- [ ] File Dialogs
+- [ ] Message Boxes
+- [ ] Gizmos
+- [ ] Texture Inspectors
+- [ ] Date Pickers
+- [ ] Curve Editors
+
+
 # CMake:
  Note that cimgui has cmake build which should not be used. It need to config mannual but still reference CMake from cimgui.
 

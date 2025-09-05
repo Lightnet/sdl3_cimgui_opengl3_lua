@@ -231,6 +231,117 @@ static int lua_igCombo_Str_arr(lua_State *L) {
     return 2;
 }
 
+// Lua binding for igProgressBar
+// Lua binding for igProgressBar
+static int lua_igProgressBar(lua_State *L) {
+    float fraction = (float)luaL_checknumber(L, 1);
+    ImVec2 size = {0, 0}; // Default size
+    if (lua_istable(L, 2)) {
+        lua_getfield(L, 2, "x"); size.x = (float)luaL_optnumber(L, -1, 0); lua_pop(L, 1);
+        lua_getfield(L, 2, "y"); size.y = (float)luaL_optnumber(L, -1, 0); lua_pop(L, 1);
+    }
+    const char *overlay = luaL_optstring(L, 3, NULL); // Optional overlay
+
+    // Call igProgressBar with size passed by value
+    igProgressBar(fraction, size, overlay);
+
+    return 0; // No return values
+}
+
+// Lua binding for igRadioButton_Bool
+static int lua_igRadioButton(lua_State *L) {
+    const char *label = luaL_checkstring(L, 1);
+    bool active = lua_toboolean(L, 2);
+
+    // Call igRadioButton_Bool
+    bool clicked = igRadioButton_Bool(label, active);
+
+    // Push result to Lua
+    lua_pushboolean(L, clicked);
+    return 1;
+}
+
+
+// Lua binding for igSeparator
+static int lua_igSeparator(lua_State *L) {
+    igSeparator();
+    return 0; // No return values
+}
+
+// Lua binding for igSpacing
+static int lua_igSpacing(lua_State *L) {
+    igSpacing();
+    return 0; // No return values
+}
+
+// Lua binding for igBeginTabBar
+static int lua_igBeginTabBar(lua_State *L) {
+    const char *str_id = luaL_checkstring(L, 1);
+    int flags = luaL_optinteger(L, 2, 0); // Default flags to 0
+
+    // Call igBeginTabBar
+    bool result = igBeginTabBar(str_id, flags);
+
+    // Push result to Lua
+    lua_pushboolean(L, result);
+    return 1;
+}
+
+// Lua binding for igEndTabBar
+static int lua_igEndTabBar(lua_State *L) {
+    igEndTabBar();
+    return 0; // No return values
+}
+
+// Lua binding for igBeginTabItem
+static int lua_igBeginTabItem(lua_State *L) {
+    const char *label = luaL_checkstring(L, 1);
+    bool p_open = lua_isboolean(L, 2) ? lua_toboolean(L, 2) : true; // Default to true if not provided
+    int flags = luaL_optinteger(L, 3, 0); // Default flags to 0
+    bool *p_open_ptr = lua_isboolean(L, 2) ? &p_open : NULL;
+
+    // Call igBeginTabItem
+    bool result = igBeginTabItem(label, p_open_ptr, flags);
+
+    // Push results to Lua
+    if (p_open_ptr) lua_pushboolean(L, *p_open_ptr); // Updated p_open value
+    else lua_pushnil(L);
+    lua_pushboolean(L, result); // Whether tab is active
+    return 2;
+}
+
+// Lua binding for igEndTabItem
+static int lua_igEndTabItem(lua_State *L) {
+    igEndTabItem();
+    return 0; // No return values
+}
+
+// Lua binding for igBeginTooltip
+static int lua_igBeginTooltip(lua_State *L) {
+    igBeginTooltip();
+    return 0; // No return values
+}
+
+// Lua binding for igEndTooltip
+static int lua_igEndTooltip(lua_State *L) {
+    igEndTooltip();
+    return 0; // No return values
+}
+
+// Lua binding for igSetTooltip
+static int lua_igSetTooltip(lua_State *L) {
+    const char *text = luaL_checkstring(L, 1);
+    igSetTooltip("%s", text);
+    return 0; // No return values
+}
+
+// Lua binding for igIsItemHovered
+static int lua_igIsItemHovered(lua_State *L) {
+    int flags = luaL_optinteger(L, 1, 0); // Default flags to 0
+    bool result = igIsItemHovered(flags);
+    lua_pushboolean(L, result);
+    return 1;
+}
 
 
 
@@ -293,6 +404,22 @@ int main() {
     lua_pushcfunction(L, lua_igInputText); lua_setfield(L, -2, "InputText");
     lua_pushcfunction(L, lua_igCombo_Str); lua_setfield(L, -2, "Combo");
     lua_pushcfunction(L, lua_igCombo_Str_arr); lua_setfield(L, -2, "ComboStrArr");
+    lua_pushcfunction(L, lua_igProgressBar); lua_setfield(L, -2, "ProgressBar");
+    lua_pushcfunction(L, lua_igRadioButton); lua_setfield(L, -2, "RadioButton");
+
+    lua_pushcfunction(L, lua_igSeparator); lua_setfield(L, -2, "Separator");
+    lua_pushcfunction(L, lua_igSpacing); lua_setfield(L, -2, "Spacing");
+
+    lua_pushcfunction(L, lua_igBeginTabBar); lua_setfield(L, -2, "BeginTabBar");
+    lua_pushcfunction(L, lua_igEndTabBar); lua_setfield(L, -2, "EndTabBar");
+    lua_pushcfunction(L, lua_igBeginTabItem); lua_setfield(L, -2, "BeginTabItem");
+    lua_pushcfunction(L, lua_igEndTabItem); lua_setfield(L, -2, "EndTabItem");
+
+    lua_pushcfunction(L, lua_igIsItemHovered); lua_setfield(L, -2, "IsItemHovered");
+
+    lua_pushcfunction(L, lua_igBeginTooltip); lua_setfield(L, -2, "BeginTooltip");
+    lua_pushcfunction(L, lua_igEndTooltip); lua_setfield(L, -2, "EndTooltip");
+    lua_pushcfunction(L, lua_igSetTooltip); lua_setfield(L, -2, "SetTooltip");
 
     lua_pushcfunction(L, lua_igSameLine); lua_setfield(L, -2, "SameLine");
     lua_pushcfunction(L, lua_igGetFramerate); lua_setfield(L, -2, "GetFramerate");
