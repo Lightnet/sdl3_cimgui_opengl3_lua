@@ -1,3 +1,7 @@
+// SDL 3.2.22
+// cimgui 1.92.2 or master
+// lua 5.4.8
+
 // main.c
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
@@ -113,6 +117,123 @@ static int lua_igGetFramerate(lua_State *L) {
     return 1;
 }
 
+// Lua binding for igInputText
+static int lua_igInputText(lua_State *L) {
+    const char *label = luaL_checkstring(L, 1);
+    const char *initial_text = luaL_checkstring(L, 2);
+    size_t buf_size = (size_t)luaL_optinteger(L, 3, 256); // Default buffer size
+    int flags = luaL_optinteger(L, 4, 0);
+
+    // Allocate buffer and copy initial text
+    char *buf = (char *)malloc(buf_size);
+    if (!buf) {
+        luaL_error(L, "Failed to allocate buffer for InputText");
+        return 0;
+    }
+    strncpy(buf, initial_text, buf_size - 1);
+    buf[buf_size - 1] = '\0'; // Ensure null-termination
+
+    // Call igInputText
+    bool changed = igInputText(label, buf, buf_size, flags, NULL, NULL);
+
+    // Push results to Lua
+    lua_pushstring(L, buf); // Updated text
+    lua_pushboolean(L, changed); // Whether text was changed
+    free(buf); // Clean up
+    return 2;
+}
+
+
+// Lua binding for igCombo_Str
+static int lua_igCombo_Str(lua_State *L) {
+    const char *label = luaL_checkstring(L, 1);
+    int current_item = (int)luaL_checkinteger(L, 2) - 1; // Lua 1-based to C 0-based
+    luaL_checktype(L, 3, LUA_TTABLE); // Items must be a table
+    int popup_max_height_in_items = luaL_optinteger(L, 4, -1); // Optional height, default -1
+
+    // Build items string (concatenate with \0)
+    lua_len(L, 3); // Get table length
+    size_t item_count = lua_tointeger(L, -1);
+    lua_pop(L, 1);
+
+    size_t total_len = 0;
+    for (size_t i = 1; i <= item_count; i++) {
+        lua_geti(L, 3, i);
+        const char *item = luaL_checkstring(L, -1);
+        total_len += strlen(item) + 1; // +1 for \0
+        lua_pop(L, 1);
+    }
+
+    char *items = (char *)malloc(total_len);
+    if (!items) {
+        luaL_error(L, "Failed to allocate buffer for Combo items");
+        return 0;
+    }
+
+    size_t offset = 0;
+    for (size_t i = 1; i <= item_count; i++) {
+        lua_geti(L, 3, i);
+        const char *item = luaL_checkstring(L, -1);
+        size_t len = strlen(item);
+        strcpy(items + offset, item);
+        offset += len + 1; // Move past string and null terminator
+        lua_pop(L, 1);
+    }
+    items[total_len - 1] = '\0'; // Ensure final null terminator
+
+    // Call igCombo_Str
+    bool changed = igCombo_Str(label, &current_item, items, popup_max_height_in_items);
+
+    // Clean up
+    free(items);
+
+    // Push results to Lua
+    lua_pushinteger(L, current_item + 1); // C 0-based to Lua 1-based
+    lua_pushboolean(L, changed);
+    return 2;
+}
+
+// Lua binding for igCombo_Str_arr
+static int lua_igCombo_Str_arr(lua_State *L) {
+    const char *label = luaL_checkstring(L, 1);
+    int current_item = (int)luaL_checkinteger(L, 2) - 1; // Lua 1-based to C 0-based
+    luaL_checktype(L, 3, LUA_TTABLE); // Items must be a table
+    int popup_max_height_in_items = luaL_optinteger(L, 4, -1); // Optional height, default -1
+
+    // Get table length
+    lua_len(L, 3);
+    size_t item_count = lua_tointeger(L, -1);
+    lua_pop(L, 1);
+
+    // Allocate array of string pointers
+    const char **items = (const char **)malloc(item_count * sizeof(const char *));
+    if (!items) {
+        luaL_error(L, "Failed to allocate buffer for Combo items");
+        return 0;
+    }
+
+    // Populate items array
+    for (size_t i = 1; i <= item_count; i++) {
+        lua_geti(L, 3, i);
+        items[i - 1] = luaL_checkstring(L, -1); // Store pointer directly
+        lua_pop(L, 1);
+    }
+
+    // Call igCombo_Str_arr
+    bool changed = igCombo_Str_arr(label, &current_item, items, item_count, popup_max_height_in_items);
+
+    // Clean up
+    free(items);
+
+    // Push results to Lua
+    lua_pushinteger(L, current_item + 1); // C 0-based to Lua 1-based
+    lua_pushboolean(L, changed);
+    return 2;
+}
+
+
+
+
 int main() {
     // Initialize SDL
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
@@ -142,19 +263,19 @@ int main() {
     SDL_GL_MakeCurrent(window, gl_context);
 
     // Setup Dear ImGui context
-    igCreateContext(NULL);
-    ImGuiIO *io = igGetIO();
-    io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    igCreateContext(NULL); // imgui
+    ImGuiIO *io = igGetIO(); // imgui
+    io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // imgui
+    io->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // imgui
 
     // Setup Dear ImGui style
-    igStyleColorsDark(NULL);
-    ImGuiStyle *style = igGetStyle();
-    ImGuiStyle_ScaleAllSizes(style, main_scale);
+    igStyleColorsDark(NULL); // imgui
+    ImGuiStyle *style = igGetStyle(); // imgui
+    ImGuiStyle_ScaleAllSizes(style, main_scale); // imgui
 
     // Setup Platform/Renderer backends
-    ImGui_ImplSDL3_InitForOpenGL(window, gl_context);
-    ImGui_ImplOpenGL3_Init("#version 330");
+    ImGui_ImplSDL3_InitForOpenGL(window, gl_context); // imgui
+    ImGui_ImplOpenGL3_Init("#version 330"); // imgui
 
     // Initialize Lua
     lua_State *L = luaL_newstate();
@@ -169,6 +290,10 @@ int main() {
     lua_pushcfunction(L, lua_igSliderFloat); lua_setfield(L, -2, "SliderFloat");
     lua_pushcfunction(L, lua_igColorEdit4); lua_setfield(L, -2, "ColorEdit4");
     lua_pushcfunction(L, lua_igButton); lua_setfield(L, -2, "Button");
+    lua_pushcfunction(L, lua_igInputText); lua_setfield(L, -2, "InputText");
+    lua_pushcfunction(L, lua_igCombo_Str); lua_setfield(L, -2, "Combo");
+    lua_pushcfunction(L, lua_igCombo_Str_arr); lua_setfield(L, -2, "ComboStrArr");
+
     lua_pushcfunction(L, lua_igSameLine); lua_setfield(L, -2, "SameLine");
     lua_pushcfunction(L, lua_igGetFramerate); lua_setfield(L, -2, "GetFramerate");
     lua_setglobal(L, "imgui");
@@ -188,7 +313,7 @@ int main() {
     while (!done) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
-            ImGui_ImplSDL3_ProcessEvent(&event);
+            ImGui_ImplSDL3_ProcessEvent(&event); // imgui
             if (event.type == SDL_EVENT_QUIT)
                 done = true;
             if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window))
@@ -201,9 +326,9 @@ int main() {
         }
 
         // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL3_NewFrame();
-        igNewFrame();
+        ImGui_ImplOpenGL3_NewFrame(); // imgui
+        ImGui_ImplSDL3_NewFrame(); // imgui
+        igNewFrame(); // imgui
 
         // Call Lua render_frame function
         lua_getglobal(L, "render_frame");
@@ -224,19 +349,19 @@ int main() {
         }
 
         // Rendering
-        igRender();
+        igRender(); // imgui
         glViewport(0, 0, (int)io->DisplaySize.x, (int)io->DisplaySize.y);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
-        ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());
+        ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData()); // imgui
         SDL_GL_SwapWindow(window);
     }
 
     // Cleanup
     lua_close(L);
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL3_Shutdown();
-    igDestroyContext(NULL);
+    ImGui_ImplOpenGL3_Shutdown(); // imgui
+    ImGui_ImplSDL3_Shutdown(); // imgui
+    igDestroyContext(NULL); // imgui
     SDL_GL_DestroyContext(gl_context);
     SDL_DestroyWindow(window);
     SDL_Quit();

@@ -14,6 +14,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 # Include FetchContent for downloading dependencies
 include(FetchContent)
 
+# Find OpenGL
+find_package(OpenGL REQUIRED)
+
 # Fetch raylib
 FetchContent_Declare(
     SDL3
@@ -30,22 +33,11 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/cimgui/cimgui.git
     GIT_TAG master 
     # GIT_TAG 1.92.1
-    EXCLUDE_FROM_ALL #this disable build since customize for sdl3 and opengl.
+    EXCLUDE_FROM_ALL #this disable cmake build? since customize for sdl3 and opengl3.
     GIT_SHALLOW TRUE
     USES_TERMINAL_DOWNLOAD TRUE
-    
 )
 FetchContent_MakeAvailable(cimgui)
-# FetchContent_GetProperties(cimgui)
-# need fint correct way since it be remove later.
-# if(NOT cimgui_POPULATED)
-#     # Fetch the content using previously declared details
-#     FetchContent_Populate(cimgui)
-#     message(STATUS "cimgui_SOURCE_DIR >> ${cimgui_SOURCE_DIR}")
-# endif()
-
-# Find OpenGL
-find_package(OpenGL REQUIRED)
 
 #================================================
 # cimgui custom
@@ -81,8 +73,9 @@ target_compile_definitions(custom_cimgui PUBLIC
 )
 
 # Link custom_cimgui with GLFW and OpenGL
+# need this to compile for library else error on compile
 target_link_libraries(custom_cimgui PUBLIC 
-    OpenGL::GL 
+    OpenGL::GL
     SDL3::SDL3
 )
 
@@ -96,7 +89,6 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(lua)
-
 
 # Lua doesn't have a CMake build, so we manually compile it
 # List Lua source files (core and libraries, excluding lua.c and luac.c)
@@ -150,6 +142,7 @@ set(APP_NAME sdl3_test)
 set(SRC_FILES
     # src/main.c
     # Add other .c files here if necessary
+
 )
 
 message(STATUS "cimgui_SOURCE_DIR: >> ${cimgui_SOURCE_DIR}")
@@ -163,7 +156,7 @@ add_executable(${APP_NAME}
 
 # SDL3 
 target_link_libraries(${APP_NAME} PUBLIC SDL3::SDL3) # SDL 3.2.22
-target_link_libraries(${APP_NAME} PRIVATE custom_cimgui) # custom cimgui
+target_link_libraries(${APP_NAME} PRIVATE custom_cimgui) # custom cimgui for sdl3 and opengl3, 1.92.1 or master
 target_link_libraries(${APP_NAME} PRIVATE lua) # lua 5.4.7
 
 # Include directories
@@ -179,7 +172,7 @@ target_include_directories(${APP_NAME} PUBLIC
 target_compile_definitions(
 	${APP_NAME}
 	PUBLIC
-    #CIMGUI_DISABLE_OBSOLETE_FUNCTIONS=1
+    #IMGUI_DISABLE_OBSOLETE_FUNCTIONS=1
 	CIMGUI_DEFINE_ENUMS_AND_STRUCTS=1
 	CIMGUI_USE_SDL3=1
 	CIMGUI_USE_OPENGL3=1
