@@ -1,6 +1,6 @@
 
 # Information:
-  Note it should have simalar format. Note there may be inorrect set up. Need to have sample test for each.
+  Note it should have similar format. Since it c language it need to format correctly. Note there may be inorrect set up. Need to have sample test for each.
 
 # InputText:
 ```lua
@@ -204,4 +204,81 @@ if imgui.TreeNode("RadioTree", "Radio Options") then
     end
     imgui.TreePop()
 end
+```
+
+# igInputTextMultiline:
+```c
+CIMGUI_API bool igInputTextMultiline(const char* label, char* buf, size_t buf_size, const ImVec2 size, ImGuiInputTextFlags flags, ImGuiInputTextCallback callback, void* user_data);
+```
+## Parameters:
+- label: The text label for the input field.
+- buf: A character buffer to store the input text.
+- buf_size: The size of the buffer (to prevent overflow).
+- size: The size of the input field (ImVec2 for width and height).
+- flags: Optional ImGuiInputTextFlags (e.g., ImGuiInputTextFlags_EnterReturnsTrue).
+- callback and user_data: Optional for custom input handling (we’ll omit these for simplicity).
+
+- Return: true if the text was edited this frame, false
+
+```lua
+local multiline_text = "Enter notes here...\nLine 2\nLine 3" -- New state for multiline text
+
+--...
+
+local new_text, changed = imgui.InputTextMultiline("Notes", multiline_text, 1024, {x = 0, y = 100})
+if changed then
+    multiline_text = new_text
+end
+```
+
+# window events:
+
+```lua
+local height = imgui.GetWindowHeight()
+local width = imgui.GetWindowWidth()
+if imgui.IsItemActive() then
+    print("Item is active")
+end
+if imgui.IsItemClicked() then
+    print("Item was clicked")
+end
+```
+
+# IsItemClicked:
+  Note this has be under widget.
+
+
+```lua
+--widget here
+if imgui.IsItemClicked() then
+    print("radio_selection IsItemClicked")
+end
+```
+
+```lua
+local radio_selection = 1
+function render_frame(clear_color)
+    imgui.Begin("Demo Window", show_demo_window)
+        imgui.Text("ImGui Demo Window (native)")
+        imgui.Text("Radio Selection:")
+        if imgui.RadioButton("Choice 1", radio_selection == 1) then radio_selection = 1 end
+        imgui.SameLine()
+        if imgui.RadioButton("Choice 2", radio_selection == 2) then radio_selection = 2 end
+        imgui.SameLine()
+        if imgui.RadioButton("Choice 3", radio_selection == 3) then radio_selection = 3 end
+        if imgui.IsItemClicked() then
+            print("radio_selection IsItemClicked")
+        end
+        imgui.Text(string.format("Selected Choice: %d", radio_selection))
+    imgui.End()
+    return clear_color
+end
+```
+
+# window bg:
+
+```lua
+local color = imgui.GetStyleColorVec4(imgui.Col.WindowBg) -- Returns {r, g, b, a}
+imgui.PushStyleColor(imgui.Col.WindowBg, {r = 0.2, g = 0.3, b = 0.4, a = 1.0})
+imgui.PopStyleColor() -- Pop the style
 ```

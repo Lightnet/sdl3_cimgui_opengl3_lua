@@ -2,31 +2,83 @@
 
 # License: MIT
 
+# Status:
+- work in progress 
+- adding widget tests.
+- will try to match the format with in reason.
+- need to write docs api
+
+# Packages:
+- SDL 3.2
+- cimgui 1.92
+- Lua 5.4
+
+# Compile:
+- msys64
+  Note using the msys64 for windows 64 bit. Which required some packages to install correctly.
+
 # Information:
-  Very simple SDL 3.2.22 cimgui. OpenGL 3. 330. Lua script.
+  This project is c program langauge and will be kept simple to build SDL 3.2.22, cimgui, opengl 3.3.0 and lua 5.4.8 script.
+
+
+  Will try to keep it simple for project sample test build. As well example tests.
+
+## Notes: 
+- The render will lag or incorrect code as well callbacks and call functions.
+- There are some bugs in render for combo.
+- It still use helper from imgui which use c++ to cimgui to c language library build.
 
 # Widgets:
-- [x]Window
+- [x] Window
+- [ ] scroll
+- [x] InputTextMultiline
+- [x] GetWindowHeight
+- [x] GetWindowWidth
+
 - [x] Text
 - [x] Button
 - [x] Input Field
-- [x] Sliders
+- [x] Input Float
+- [x] Sliders Float ?
+- [ ] Sliders Int ?
 - [x] Checkboxes
 - [x] Radio Buttons
 - [x] Combo Boxes
+- [ ] ListBox
 - [x] Progress Bar
+
+- [x] Separators : `ImGui::Separator()` draws a horizontal line.
+- [x] Spacing :`ImGui::Spacing()` adds vertical space.
+- [x] SameLine `ImGui::SameLine()` places the next widget on the same line as the previous one. 
+
 - [x] Trees and Tree Nodes
-- [x] Separators and Spacing
-- [x] Tab Bars and Tab Items
+
+- [ ] Tables
+- [x] Columns : for multi-column layouts.
+
+- [ ] Menu 
+- [ ] Menu Bars 
+
+- [x] Tab Bars
+- [x] Tab Items
+
 - [x] Tooltips
-- [x] Child Windows
-- [x] Columns
+- [x] Child Windows :  creates a scrollable sub-window within a parent window.
+
+- [x] Color Edit : `ImGui::ColorEdit3("Color", myColorArray)` for editing RGB colors.
+- [ ] Image
+- [ ] Plots
+
+- [x] IsItemHovered
+- [x] IsItemActive
+- [x] IsItemClicked
+
+- [ ] draw
 
 ## Notes:
 - There might be bug in script while testing.
-- There chance it would crash for IsItemHovered, tooltip and other things.
 
-## Widgets community:
+## Widgets community (refs):
 - [ ] Plotting Libraries
 - [ ] Node Editors
 - [ ] Timeline Editors

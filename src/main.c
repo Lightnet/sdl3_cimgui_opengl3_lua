@@ -69,22 +69,18 @@ static int lua_igSliderFloat(lua_State *L) {
 // Lua binding for igColorEdit4
 static int lua_igColorEdit4(lua_State *L) {
     const char *label = luaL_checkstring(L, 1);
-    ImVec4 color;
-    if (lua_istable(L, 2)) {
-        lua_getfield(L, 2, "x"); color.x = (float)luaL_checknumber(L, -1); lua_pop(L, 1);
-        lua_getfield(L, 2, "y"); color.y = (float)luaL_checknumber(L, -1); lua_pop(L, 1);
-        lua_getfield(L, 2, "z"); color.z = (float)luaL_checknumber(L, -1); lua_pop(L, 1);
-        lua_getfield(L, 2, "w"); color.w = (float)luaL_checknumber(L, -1); lua_pop(L, 1);
-    } else {
-        color = (ImVec4){0.45f, 0.55f, 0.60f, 1.00f};
-    }
-    int flags = luaL_optinteger(L, 3, 0);
-    bool result = igColorEdit4(label, (float*)&color, flags);
+    float col[4];
+    col[0] = (float)luaL_checknumber(L, 2); // r
+    col[1] = (float)luaL_checknumber(L, 3); // g
+    col[2] = (float)luaL_checknumber(L, 4); // b
+    col[3] = (float)luaL_optnumber(L, 5, 1.0f); // a, default 1.0
+    int flags = luaL_optinteger(L, 6, 0); // Optional flags
+    bool result = igColorEdit4(label, col, flags);
     lua_newtable(L);
-    lua_pushnumber(L, color.x); lua_setfield(L, -2, "x");
-    lua_pushnumber(L, color.y); lua_setfield(L, -2, "y");
-    lua_pushnumber(L, color.z); lua_setfield(L, -2, "z");
-    lua_pushnumber(L, color.w); lua_setfield(L, -2, "w");
+    lua_pushnumber(L, col[0]); lua_setfield(L, -2, "r");
+    lua_pushnumber(L, col[1]); lua_setfield(L, -2, "g");
+    lua_pushnumber(L, col[2]); lua_setfield(L, -2, "b");
+    lua_pushnumber(L, col[3]); lua_setfield(L, -2, "a");
     lua_pushboolean(L, result);
     return 2;
 }
@@ -142,7 +138,6 @@ static int lua_igInputText(lua_State *L) {
     free(buf); // Clean up
     return 2;
 }
-
 
 // Lua binding for igCombo_Str
 static int lua_igCombo_Str(lua_State *L) {
@@ -424,6 +419,110 @@ static int lua_igTreePop(lua_State *L) {
     return 0; // No return values
 }
 
+// Lua binding for igInputTextMultiline
+static int lua_igInputTextMultiline(lua_State *L) {
+    const char *label = luaL_checkstring(L, 1);
+    const char *text = luaL_checkstring(L, 2);
+    size_t buf_size = luaL_optinteger(L, 3, 256); // Default buffer size
+    ImVec2 size = {0, 0}; // Default size (auto-resize)
+    if (lua_istable(L, 4)) {
+        lua_getfield(L, 4, "x"); size.x = (float)luaL_optnumber(L, -1, 0); lua_pop(L, 1);
+        lua_getfield(L, 4, "y"); size.y = (float)luaL_optnumber(L, -1, 0); lua_pop(L, 1);
+    }
+    int flags = luaL_optinteger(L, 5, 0); // Default flags to 0
+
+    // Allocate buffer
+    char *buf = (char *)malloc(buf_size);
+    if (!buf) {
+        luaL_error(L, "Failed to allocate buffer for InputTextMultiline");
+        return 0;
+    }
+    strncpy(buf, text, buf_size - 1);
+    buf[buf_size - 1] = '\0'; // Ensure null-termination
+
+    // Call igInputTextMultiline
+    bool changed = igInputTextMultiline(label, buf, buf_size, size, flags, NULL, NULL);
+
+    // Push results to Lua
+    lua_pushstring(L, buf); // Updated text
+    lua_pushboolean(L, changed); // Whether text was edited
+    free(buf); // Clean up
+    return 2;
+}
+
+// Lua binding for igGetWindowHeight
+static int lua_igGetWindowHeight(lua_State *L) {
+    float height = igGetWindowHeight();
+    lua_pushnumber(L, height);
+    return 1;
+}
+
+// Lua binding for igGetWindowWidth
+static int lua_igGetWindowWidth(lua_State *L) {
+    float width = igGetWindowWidth();
+    lua_pushnumber(L, width);
+    return 1;
+}
+
+// Lua binding for igIsItemActive
+static int lua_igIsItemActive(lua_State *L) {
+    bool active = igIsItemActive();
+    lua_pushboolean(L, active);
+    return 1;
+}
+
+// Lua binding for igIsItemClicked
+static int lua_igIsItemClicked(lua_State *L) {
+    int mouse_button = luaL_optinteger(L, 1, 0); // Default to left mouse button (0)
+    bool clicked = igIsItemClicked(mouse_button);
+    lua_pushboolean(L, clicked);
+    return 1;
+}
+
+// Lua binding for igGetStyleColorVec4
+static int lua_igGetStyleColorVec4(lua_State *L) {
+    int idx = (int)luaL_checkinteger(L, 1);
+    const ImVec4 *color_ptr = igGetStyleColorVec4(idx);
+    
+    // Return color as a Lua table
+    lua_newtable(L);
+    lua_pushnumber(L, color_ptr->x); lua_setfield(L, -2, "r");
+    lua_pushnumber(L, color_ptr->y); lua_setfield(L, -2, "g");
+    lua_pushnumber(L, color_ptr->z); lua_setfield(L, -2, "b");
+    lua_pushnumber(L, color_ptr->w); lua_setfield(L, -2, "a");
+    return 1;
+}
+
+// Lua binding for igPushStyleColor_Vec4
+static int lua_igPushStyleColor(lua_State *L) {
+    int idx = (int)luaL_checkinteger(L, 1);
+    ImVec4 color = {0, 0, 0, 1}; // Default color (black, fully opaque)
+    if (lua_istable(L, 2)) {
+        lua_getfield(L, 2, "r"); color.x = (float)luaL_optnumber(L, -1, 0); lua_pop(L, 1);
+        lua_getfield(L, 2, "g"); color.y = (float)luaL_optnumber(L, -1, 0); lua_pop(L, 1);
+        lua_getfield(L, 2, "b"); color.z = (float)luaL_optnumber(L, -1, 0); lua_pop(L, 1);
+        lua_getfield(L, 2, "a"); color.w = (float)luaL_optnumber(L, -1, 1); lua_pop(L, 1);
+    }
+    
+    igPushStyleColor_Vec4(idx, color);
+    return 0;
+}
+
+// Lua binding for igPopStyleColor
+static int lua_igPopStyleColor(lua_State *L) {
+    int count = luaL_optinteger(L, 1, 1); // Default to popping 1 style
+    igPopStyleColor(count);
+    return 0;
+}
+
+
+static void lua_set_imgui_constants(lua_State *L) {
+    lua_newtable(L);
+    lua_pushinteger(L, ImGuiCol_WindowBg); lua_setfield(L, -2, "WindowBg");
+    // Add other ImGuiCol constants as needed
+    lua_setfield(L, -2, "Col");
+}
+
 // Main
 int main(int argc, char *argv[]) {
     // Initialize SDL 3.2
@@ -474,6 +573,8 @@ int main(int argc, char *argv[]) {
 
     // Register cimgui functions to Lua
     lua_newtable(L);
+    lua_set_imgui_constants(L); // Set ImGuiCol constants
+    //...
     lua_pushcfunction(L, lua_igBegin); lua_setfield(L, -2, "Begin");
     lua_pushcfunction(L, lua_igEnd); lua_setfield(L, -2, "End");
     lua_pushcfunction(L, lua_igText); lua_setfield(L, -2, "Text");
@@ -513,8 +614,20 @@ int main(int argc, char *argv[]) {
     lua_pushcfunction(L, lua_igTreeNode); lua_setfield(L, -2, "TreeNode");
     lua_pushcfunction(L, lua_igTreePop); lua_setfield(L, -2, "TreePop");
 
+    lua_pushcfunction(L, lua_igInputTextMultiline); lua_setfield(L, -2, "InputTextMultiline");
+
+    lua_pushcfunction(L, lua_igGetWindowHeight); lua_setfield(L, -2, "GetWindowHeight");
+    lua_pushcfunction(L, lua_igGetWindowWidth); lua_setfield(L, -2, "GetWindowWidth");
+    lua_pushcfunction(L, lua_igIsItemActive); lua_setfield(L, -2, "IsItemActive");
+    lua_pushcfunction(L, lua_igIsItemClicked); lua_setfield(L, -2, "IsItemClicked");
+
     lua_pushcfunction(L, lua_igSameLine); lua_setfield(L, -2, "SameLine");
     lua_pushcfunction(L, lua_igGetFramerate); lua_setfield(L, -2, "GetFramerate");
+
+    lua_pushcfunction(L, lua_igGetStyleColorVec4); lua_setfield(L, -2, "GetStyleColorVec4");
+    lua_pushcfunction(L, lua_igPushStyleColor); lua_setfield(L, -2, "PushStyleColor");
+    lua_pushcfunction(L, lua_igPopStyleColor); lua_setfield(L, -2, "PopStyleColor");
+
     lua_setglobal(L, "imgui");
 
     // Determine Lua script file
@@ -558,7 +671,7 @@ int main(int argc, char *argv[]) {
     // }
 
     // Global clear color
-    ImVec4 clear_color = {0.45f, 0.55f, 0.60f, 1.00f};
+    // ImVec4 clear_color = {0.45f, 0.55f, 0.60f, 1.00f};
 
     // Main loop
     bool done = false;
@@ -584,26 +697,28 @@ int main(int argc, char *argv[]) {
 
         // Call Lua render_frame function
         lua_getglobal(L, "render_frame");
-        lua_newtable(L);
-        lua_pushnumber(L, clear_color.x); lua_setfield(L, -2, "x");
-        lua_pushnumber(L, clear_color.y); lua_setfield(L, -2, "y");
-        lua_pushnumber(L, clear_color.z); lua_setfield(L, -2, "z");
-        lua_pushnumber(L, clear_color.w); lua_setfield(L, -2, "w");
-        if (lua_pcall(L, 1, 1, 0) != LUA_OK) {
+        if (lua_pcall(L, 0, 1, 0) != LUA_OK) { // No arguments passed
             fprintf(stderr, "Error in render_frame: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
         } else if (lua_istable(L, -1)) {
-            lua_getfield(L, -1, "x"); clear_color.x = (float)lua_tonumber(L, -1); lua_pop(L, 1);
-            lua_getfield(L, -1, "y"); clear_color.y = (float)lua_tonumber(L, -1); lua_pop(L, 1);
-            lua_getfield(L, -1, "z"); clear_color.z = (float)lua_tonumber(L, -1); lua_pop(L, 1);
-            lua_getfield(L, -1, "w"); clear_color.w = (float)lua_tonumber(L, -1); lua_pop(L, 1);
+            float r = 0.0f, g = 0.0f, b = 0.0f, a = 1.0f;
+            lua_getfield(L, -1, "r"); r = (float)lua_tonumber(L, -1); lua_pop(L, 1);
+            lua_getfield(L, -1, "g"); g = (float)lua_tonumber(L, -1); lua_pop(L, 1);
+            lua_getfield(L, -1, "b"); b = (float)lua_tonumber(L, -1); lua_pop(L, 1);
+            lua_getfield(L, -1, "a"); a = (float)lua_tonumber(L, -1); lua_pop(L, 1);
             lua_pop(L, 1);
+            // Set clear color for OpenGL
+            glClearColor(r, g, b, a);
+        } else {
+            fprintf(stderr, "Error: render_frame did not return a table\n");
+            lua_pop(L, 1);
+            glClearColor(0.45f, 0.55f, 0.60f, 1.00f); // Fallback color
         }
 
         // Rendering
         igRender(); // imgui
         glViewport(0, 0, (int)io->DisplaySize.x, (int)io->DisplaySize.y);
-        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+        // glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData()); // imgui
         SDL_GL_SwapWindow(window);

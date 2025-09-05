@@ -1,4 +1,4 @@
-
+-- this for sdl3 clear color background color
 local clear_color_test = {r = 0.45, g = 0.55, b = 0.60, a = 1.00}
 
 -- Clear color state (initialized with ImGui's default)
