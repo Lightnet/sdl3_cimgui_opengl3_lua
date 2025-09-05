@@ -5,8 +5,7 @@
 # Information:
   Very simple SDL 3.2.22 cimgui. OpenGL 3. 330. Lua script.
 
-
-# widgets:
+# Widgets:
 - [x]Window
 - [x] Text
 - [x] Button
@@ -16,14 +15,18 @@
 - [x] Radio Buttons
 - [x] Combo Boxes
 - [x] Progress Bar
-- [ ] Trees and Tree Nodes
+- [x] Trees and Tree Nodes
 - [x] Separators and Spacing
 - [x] Tab Bars and Tab Items
 - [x] Tooltips
-- [ ] Child Windows
-- [ ] Columns
+- [x] Child Windows
+- [x] Columns
 
-## widgets community:
+## Notes:
+- There might be bug in script while testing.
+- There chance it would crash for IsItemHovered, tooltip and other things.
+
+## Widgets community:
 - [ ] Plotting Libraries
 - [ ] Node Editors
 - [ ] Timeline Editors

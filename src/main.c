@@ -344,6 +344,90 @@ static int lua_igIsItemHovered(lua_State *L) {
 }
 
 
+// Lua binding for igBeginColumns
+static int lua_igBeginColumns(lua_State *L) {
+    const char *str_id = luaL_checkstring(L, 1);
+    int count = (int)luaL_checkinteger(L, 2);
+    int flags = luaL_optinteger(L, 3, 0); // Default flags to 0
+
+    igBeginColumns(str_id, count, flags);
+    return 0; // No return values
+}
+
+// Lua binding for igEndColumns
+static int lua_igEndColumns(lua_State *L) {
+    igEndColumns();
+    return 0; // No return values
+}
+
+// Lua binding for igNextColumn
+static int lua_igNextColumn(lua_State *L) {
+    igNextColumn();
+    return 0; // No return values
+}
+
+// Lua binding for igSetColumnWidth
+static int lua_igSetColumnWidth(lua_State *L) {
+    int column_index = (int)luaL_checkinteger(L, 1);
+    float width = (float)luaL_checknumber(L, 2);
+
+    igSetColumnWidth(column_index, width);
+    return 0; // No return values
+}
+
+
+// Lua binding for igBeginChild_Str
+static int lua_igBeginChild(lua_State *L) {
+    const char *str_id = luaL_checkstring(L, 1);
+    ImVec2 size = {0, 0}; // Default size
+    if (lua_istable(L, 2)) {
+        lua_getfield(L, 2, "x"); size.x = (float)luaL_optnumber(L, -1, 0); lua_pop(L, 1);
+        lua_getfield(L, 2, "y"); size.y = (float)luaL_optnumber(L, -1, 0); lua_pop(L, 1);
+    }
+    bool border = lua_toboolean(L, 3); // Default to false if not provided
+    int flags = luaL_optinteger(L, 4, 0); // Default flags to 0
+
+    // Call igBeginChild_Str
+    bool result = igBeginChild_Str(str_id, size, border, flags);
+
+    // Push result to Lua
+    lua_pushboolean(L, result);
+    return 1;
+}
+
+// Lua binding for igEndChild
+static int lua_igEndChild(lua_State *L) {
+    igEndChild();
+    return 0; // No return values
+}
+
+// Lua binding for igIsWindowHovered
+static int lua_igIsWindowHovered(lua_State *L) {
+    int flags = luaL_optinteger(L, 1, 0); // Default flags to 0
+    bool result = igIsWindowHovered(flags);
+    lua_pushboolean(L, result);
+    return 1;
+}
+
+// Lua binding for igTreeNode_StrStr
+static int lua_igTreeNode(lua_State *L) {
+    const char *str_id = luaL_checkstring(L, 1);
+    const char *label = luaL_checkstring(L, 2);
+
+    // Call igTreeNode_StrStr
+    bool result = igTreeNode_StrStr(str_id, "%s", label);
+
+    // Push result to Lua
+    lua_pushboolean(L, result);
+    return 1;
+}
+
+// Lua binding for igTreePop
+static int lua_igTreePop(lua_State *L) {
+    igTreePop();
+    return 0; // No return values
+}
+
 
 int main() {
     // Initialize SDL
@@ -415,11 +499,23 @@ int main() {
     lua_pushcfunction(L, lua_igBeginTabItem); lua_setfield(L, -2, "BeginTabItem");
     lua_pushcfunction(L, lua_igEndTabItem); lua_setfield(L, -2, "EndTabItem");
 
+    lua_pushcfunction(L, lua_igBeginColumns); lua_setfield(L, -2, "BeginColumns");
+    lua_pushcfunction(L, lua_igEndColumns); lua_setfield(L, -2, "EndColumns");
+    lua_pushcfunction(L, lua_igNextColumn); lua_setfield(L, -2, "NextColumn");
+    lua_pushcfunction(L, lua_igSetColumnWidth); lua_setfield(L, -2, "SetColumnWidth");
+
     lua_pushcfunction(L, lua_igIsItemHovered); lua_setfield(L, -2, "IsItemHovered");
 
     lua_pushcfunction(L, lua_igBeginTooltip); lua_setfield(L, -2, "BeginTooltip");
     lua_pushcfunction(L, lua_igEndTooltip); lua_setfield(L, -2, "EndTooltip");
     lua_pushcfunction(L, lua_igSetTooltip); lua_setfield(L, -2, "SetTooltip");
+
+    lua_pushcfunction(L, lua_igBeginChild); lua_setfield(L, -2, "BeginChild");
+    lua_pushcfunction(L, lua_igEndChild); lua_setfield(L, -2, "EndChild");
+    lua_pushcfunction(L, lua_igIsWindowHovered); lua_setfield(L, -2, "IsWindowHovered");
+
+    lua_pushcfunction(L, lua_igTreeNode); lua_setfield(L, -2, "TreeNode");
+    lua_pushcfunction(L, lua_igTreePop); lua_setfield(L, -2, "TreePop");
 
     lua_pushcfunction(L, lua_igSameLine); lua_setfield(L, -2, "SameLine");
     lua_pushcfunction(L, lua_igGetFramerate); lua_setfield(L, -2, "GetFramerate");

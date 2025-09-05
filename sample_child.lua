@@ -31,22 +31,6 @@ function render_frame(clear_color)
             imgui.Text("Status Child Window")
             imgui.EndChild()
         end
-        if imgui.TreeNode("RadioTree", "Radio Options") then
-            imgui.Text("Radio Selection:")
-            if imgui.RadioButton("Choice 1", radio_selection == 1) then radio_selection = 1 end
-            imgui.SameLine()
-            if imgui.RadioButton("Choice 2", radio_selection == 2) then radio_selection = 2 end
-            imgui.SameLine()
-            if imgui.RadioButton("Choice 3", radio_selection == 3) then radio_selection = 3 end
-            imgui.Text(string.format("Selected Choice: %d", radio_selection))
-            if imgui.IsItemHovered() then
-                imgui.BeginTooltip()
-                imgui.Text("Radio Options Node")
-                imgui.Text(string.format("Current selection: %d", radio_selection))
-                imgui.EndTooltip()
-            end
-            imgui.TreePop()
-        end
     imgui.End()
 
     -- Simple window

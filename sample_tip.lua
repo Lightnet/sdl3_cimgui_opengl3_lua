@@ -25,56 +25,32 @@ function render_frame(clear_color)
         imgui.End()
     end
 
-    imgui.Begin("Child", true)
-        imgui.Text("Status Child Window")
-        if imgui.BeginChild("StatusChild", {x = 0, y = 150}, true) then
-            imgui.Text("Status Child Window")
-            imgui.EndChild()
-        end
-        if imgui.TreeNode("RadioTree", "Radio Options") then
-            imgui.Text("Radio Selection:")
-            if imgui.RadioButton("Choice 1", radio_selection == 1) then radio_selection = 1 end
-            imgui.SameLine()
-            if imgui.RadioButton("Choice 2", radio_selection == 2) then radio_selection = 2 end
-            imgui.SameLine()
-            if imgui.RadioButton("Choice 3", radio_selection == 3) then radio_selection = 3 end
-            imgui.Text(string.format("Selected Choice: %d", radio_selection))
-            if imgui.IsItemHovered() then
-                imgui.BeginTooltip()
-                imgui.Text("Radio Options Node")
-                imgui.Text(string.format("Current selection: %d", radio_selection))
-                imgui.EndTooltip()
-            end
-            imgui.TreePop()
-        end
-    imgui.End()
-
     -- Simple window
     imgui.Begin("Hello, world!", true)
     imgui.Text("This is some useful text.")
 
     -- Tab bar
     if imgui.BeginTabBar("MainTabBar") then
-        -- Tab 1: Checkboxes and Slider in Columns
+        -- Tab 1: Checkboxes and Slider
         local p_open, is_active = imgui.BeginTabItem("Controls", tab1_open)
         if is_active then
-            imgui.BeginColumns("ControlColumns", 2)
-            imgui.SetColumnWidth(0, 200)
             show_demo_window = imgui.Checkbox("Demo Window", show_demo_window)
-            imgui.SetTooltip("Toggle the demo window")
+            -- imgui.SetTooltip("Toggle the demo window") -- Simple tooltip
+            imgui.SameLine()
             show_another_window = imgui.Checkbox("Another Window", show_another_window)
-            imgui.SetTooltip("Toggle another window")
-            imgui.NextColumn()
+            if imgui.IsItemHovered() then
+                imgui.SetTooltip("Checkbox") -- Simple tooltip
+            end
+            -- imgui.SetTooltip("Toggle another window") -- Simple tooltip
             imgui.Spacing()
             f = imgui.SliderFloat("float", f, 0.0, 1.0, "%.3f")
+            -- Complex tooltip for slider
             if imgui.IsItemHovered() then
-                if imgui.BeginTooltip() then
-                    imgui.Text(string.format("Slider value: %.3f", f))
-                    imgui.Text("Adjusts a floating-point value")
-                    imgui.EndTooltip()
-                end
+                imgui.BeginTooltip()
+                imgui.Text("test")
+                imgui.Text("test")
+                imgui.EndTooltip()
             end
-            imgui.EndColumns()
             imgui.EndTabItem()
         end
         tab1_open = p_open or tab1_open
@@ -82,6 +58,7 @@ function render_frame(clear_color)
         -- Tab 2: Text Input and Combo
         p_open, is_active = imgui.BeginTabItem("Input", tab2_open)
         if is_active then
+            -- Simple tooltip for tab itself
             if imgui.IsItemHovered() then
                 imgui.SetTooltip("This is the Input tab")
             end
@@ -96,31 +73,20 @@ function render_frame(clear_color)
         end
         tab2_open = p_open or tab2_open
 
-        -- Tab 3: Progress Bar and Radio Buttons in Child Window
+        -- Tab 3: Progress Bar and Radio Buttons
         p_open, is_active = imgui.BeginTabItem("Status", tab3_open)
         if is_active then
             imgui.Spacing()
-            -- Child window for progress bar and radio buttons
-            if imgui.BeginChild("StatusChild", {x = 0, y = 150}, true) then
-                imgui.ProgressBar(progress, {x = -1, y = 0}, string.format("%.0f%%", progress * 100))
-                imgui.Separator()
-                imgui.Spacing()
-                imgui.Text("Radio Selection:")
-                if imgui.RadioButton("Choice 1", radio_selection == 1) then radio_selection = 1 end
-                imgui.SameLine()
-                if imgui.RadioButton("Choice 2", radio_selection == 2) then radio_selection = 2 end
-                imgui.SameLine()
-                if imgui.RadioButton("Choice 3", radio_selection == 3) then radio_selection = 3 end
-                imgui.Text(string.format("Selected Choice: %d", radio_selection))
-                if imgui.IsWindowHovered() then
-                    if imgui.BeginTooltip() then
-                        imgui.Text("Status Child Window")
-                        imgui.Text("Contains progress and radio buttons")
-                        imgui.EndTooltip()
-                    end
-                end
-                imgui.EndChild()
-            end
+            imgui.ProgressBar(progress, {x = -1, y = 0}, string.format("%.0f%%", progress * 100))
+            imgui.Separator()
+            imgui.Spacing()
+            imgui.Text("Radio Selection:")
+            if imgui.RadioButton("Choice 1", radio_selection == 1) then radio_selection = 1 end
+            imgui.SameLine()
+            if imgui.RadioButton("Choice 2", radio_selection == 2) then radio_selection = 2 end
+            imgui.SameLine()
+            if imgui.RadioButton("Choice 3", radio_selection == 3) then radio_selection = 3 end
+            imgui.Text(string.format("Selected Choice: %d", radio_selection))
             imgui.EndTabItem()
         end
         tab3_open = p_open or tab3_open
