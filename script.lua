@@ -29,8 +29,9 @@ function render_frame(clear_color)
         imgui.Text("Status Child Window")
         if imgui.BeginChild("StatusChild", {x = 0, y = 150}, true) then
             imgui.Text("Status Child Window")
-            imgui.EndChild()
+            
         end
+        imgui.EndChild()
         if imgui.TreeNode("RadioTree", "Radio Options") then
             imgui.Text("Radio Selection:")
             if imgui.RadioButton("Choice 1", radio_selection == 1) then radio_selection = 1 end
@@ -61,18 +62,17 @@ function render_frame(clear_color)
             imgui.BeginColumns("ControlColumns", 2)
             imgui.SetColumnWidth(0, 200)
             show_demo_window = imgui.Checkbox("Demo Window", show_demo_window)
-            imgui.SetTooltip("Toggle the demo window")
+            -- imgui.SetTooltip("Toggle the demo window")
             show_another_window = imgui.Checkbox("Another Window", show_another_window)
-            imgui.SetTooltip("Toggle another window")
+            -- imgui.SetTooltip("Toggle another window")
             imgui.NextColumn()
             imgui.Spacing()
             f = imgui.SliderFloat("float", f, 0.0, 1.0, "%.3f")
             if imgui.IsItemHovered() then
-                if imgui.BeginTooltip() then
-                    imgui.Text(string.format("Slider value: %.3f", f))
-                    imgui.Text("Adjusts a floating-point value")
-                    imgui.EndTooltip()
-                end
+                imgui.BeginTooltip()
+                imgui.Text(string.format("Slider value: %.3f", f))
+                imgui.Text("Adjusts a floating-point value")
+                imgui.EndTooltip()
             end
             imgui.EndColumns()
             imgui.EndTabItem()
@@ -112,13 +112,12 @@ function render_frame(clear_color)
                 imgui.SameLine()
                 if imgui.RadioButton("Choice 3", radio_selection == 3) then radio_selection = 3 end
                 imgui.Text(string.format("Selected Choice: %d", radio_selection))
-                if imgui.IsWindowHovered() then
-                    if imgui.BeginTooltip() then
-                        imgui.Text("Status Child Window")
-                        imgui.Text("Contains progress and radio buttons")
-                        imgui.EndTooltip()
-                    end
-                end
+                -- if imgui.IsWindowHovered() then
+                --     imgui.BeginTooltip()
+                --     imgui.Text("Status Child Window")
+                --     imgui.Text("Contains progress and radio buttons")
+                --     imgui.EndTooltip()
+                -- end
                 imgui.EndChild()
             end
             imgui.EndTabItem()
